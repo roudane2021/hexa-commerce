@@ -1,5 +1,6 @@
 package com.roudane.commerce.order.application.usecase.order;
 
+import com.roudane.commerce.common.domain.annotation.LogBusinessAction;
 import com.roudane.commerce.order.application.port.in.order.GetOrdersByUserUseCase;
 import com.roudane.commerce.order.domain.model.Order;
 import com.roudane.commerce.order.domain.model.UserId;
@@ -16,6 +17,7 @@ public class GetOrdersByUserUseCaseImpl implements GetOrdersByUserUseCase {
     }
 
     @Override
+    @LogBusinessAction(value = "Récupération des commandes par utilisateur")
     public List<Order> handle(UserId userId) {
         return orderRepositoryPort.findByUserId(userId);
     }

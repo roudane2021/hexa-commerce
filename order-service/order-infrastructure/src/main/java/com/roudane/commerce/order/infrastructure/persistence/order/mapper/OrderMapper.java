@@ -15,7 +15,6 @@ public class OrderMapper {
         OrderJpaEntity entity = new OrderJpaEntity(
                 order.getId().value(),
                 order.getUserId().value(),
-                order.getCreatedAt(),
                 order.getStatus()
         );
 

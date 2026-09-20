@@ -5,6 +5,8 @@ import com.roudane.commerce.common.exceptions.ConflictException;
 import com.roudane.commerce.common.exceptions.NotFoundException;
 import com.roudane.commerce.common.exceptions.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,34 +21,32 @@ import java.time.Instant;
 import java.util.*;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(NotFoundException.class)
-    public ProblemDetail handleNotFound(NotFoundException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problem.setProperty("errorCode", ex.getErrorCode());
-        return problem;
+    public ProblemDetail handleNotFound(NotFoundException ex, HttpServletRequest request) {
+        log.warn("Ressource introuvable [{}] : {}", ex.getErrorCode(), ex.getMessage());
+        return buildProblem(HttpStatus.NOT_FOUND, ex.getErrorCode(), ex.getMessage(), request);
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ProblemDetail handleValidation(ValidationException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-        problem.setProperty("errorCode", ex.getErrorCode());
-        return problem;
+    public ProblemDetail handleValidation(ValidationException ex, HttpServletRequest request) {
+        log.warn("Violation de règle métier [{}] : {}", ex.getErrorCode(), ex.getMessage());
+        return buildProblem(HttpStatus.BAD_REQUEST, ex.getErrorCode(), ex.getMessage(), request);
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ProblemDetail handleConflict(ConflictException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
-        problem.setProperty("errorCode", ex.getErrorCode());
-        return problem;
+    public ProblemDetail handleConflict(ConflictException ex, HttpServletRequest request) {
+        log.warn("Conflit d'état [{}] : {}", ex.getErrorCode(), ex.getMessage());
+        return buildProblem(HttpStatus.CONFLICT, ex.getErrorCode(), ex.getMessage(), request);
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ProblemDetail handleGenericBusiness(BusinessException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        problem.setProperty("errorCode", ex.getErrorCode());
-        return problem;
+    public ProblemDetail handleGenericBusiness(BusinessException ex, HttpServletRequest request) {
+        log.error("Erreur métier non catégorisée [{}] : {}", ex.getErrorCode(), ex.getMessage());
+        return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, ex.getErrorCode(), ex.getMessage(), request);
     }
 
     // ---------- Validation @Valid sur @RequestBody ----------
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
                         "message", Objects.requireNonNullElse(fe.getDefaultMessage(), "invalide")))
                 .toList();
 
-        //log.warn("Validation échouée sur {} : {} erreur(s)", httpRequest.getRequestURI(), violations.size());
+        log.warn("Validation échouée sur {} : {} erreur(s)", httpRequest.getRequestURI(), violations.size());
 
         ProblemDetail problem = buildProblem(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
                 "Un ou plusieurs champs sont invalides", httpRequest);
@@ -78,47 +78,16 @@ public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(problem);
     }
 
-    // ---------- Validation sur @RequestParam / @PathVariable ----------
-
-//    @ExceptionHandler(ConstraintViolationException.class)
-//    public ProblemDetail handleConstraintViolation(ConstraintViolationException ex,
-//                                                   HttpServletRequest request) {
-//        List<Map<String, String>> violations = ex.getConstraintViolations().stream()
-//                .map(v -> Map.of(
-//                        "field", v.getPropertyPath().toString(),
-//                        "message", v.getMessage()))
-//                .toList();
-//
-//        log.warn("Contrainte violée sur {} : {}", request.getRequestURI(), violations);
-//
-//        ProblemDetail problem = buildProblem(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
-//                "Paramètres invalides", request);
-//        problem.setProperty("violations", violations);
-//
-//        return problem;
-//    }
-//
-//    // ---------- Intégrité base de données ----------
-//
-//    @ExceptionHandler(DataIntegrityViolationException.class)
-//    public ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex,
-//                                             HttpServletRequest request) {
-//        log.error("Violation d'intégrité sur {}", request.getRequestURI(), ex);
-//
-//        return buildProblem(HttpStatus.CONFLICT, "DATA_INTEGRITY_VIOLATION",
-//                "L'opération viole une contrainte de données", request);
-//    }
-
     // ---------- Filet de sécurité ----------
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(Exception ex, HttpServletRequest request) {
-        // Un seul appel à buildProblem garantit que le traceId logué et renvoyé est le même
         ProblemDetail problem = buildProblem(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                 "Une erreur interne est survenue. Contactez le support en citant le traceId.",
                 request);
 
-        //log.error("Erreur inattendue [traceId={}] sur {}", problem.getProperties().get("traceId"), request.getRequestURI(), ex);
+        log.error("Erreur inattendue [traceId={}] sur {}", problem.getProperties().get("traceId"),
+                request.getRequestURI(), ex);
 
         return problem;
     }

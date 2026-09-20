@@ -1,5 +1,6 @@
 package com.roudane.commerce.order.infrastructure.rest.order;
 
+import com.roudane.commerce.common.domain.annotation.LogTechnicalCall;
 import com.roudane.commerce.order.application.command.CreateOrderCommand;
 
 import com.roudane.commerce.order.application.port.in.order.CreateOrderUseCase;
@@ -27,6 +28,7 @@ public class OrderController {
     }
 
     @PostMapping
+    @LogTechnicalCall("Création d'une commande via l'API REST")
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request) {
         var lines = request.lines().stream()
                 .map(l -> new CreateOrderCommand.OrderLineCommand(l.productId(), l.quantity(), l.unitPrice()))
@@ -39,6 +41,7 @@ public class OrderController {
     }
 
     @GetMapping("/user/{userId}")
+    @LogTechnicalCall("Récupération commandes par ID utilisateur")
     public ResponseEntity<List<OrderResponse>> getByUser(@PathVariable("userId") UUID userId) {
         var orders = getOrdersByUserUseCase.handle(new UserId(userId));
         return ResponseEntity.ok(orders.stream().map(OrderResponse::from).toList());

@@ -30,6 +30,9 @@
         <archunit.version>1.3.0</archunit.version>
         <springdoc.version>3.1.1</springdoc.version>
         <testcontainers.version>1.20.4</testcontainers.version>
+        <lombok.version>1.18.36</lombok.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     </properties>
 
     <dependencyManagement>
@@ -61,6 +64,28 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- Spring Boot Starter AOP (non présent dans spring-boot-dependencies 4.x BOM) -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-aop</artifactId>
+                <version>3.4.13</version>
+            </dependency>
+
+            <!-- Lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- MapStruct -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
             <!-- Modules internes : common-kernel -->
             <dependency>
                 <groupId>com.roudane.commerce</groupId>
@@ -87,6 +112,7 @@
                 <artifactId>common-persistence</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
 
             <!-- Modules internes : order-service -->
             <dependency>

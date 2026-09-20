@@ -1,5 +1,6 @@
 package com.roudane.commerce.order.application.usecase.order;
 
+import com.roudane.commerce.common.domain.annotation.LogBusinessAction;
 import com.roudane.commerce.order.application.port.in.order.GetOrderUseCase;
 import com.roudane.commerce.order.domain.model.Order;
 import com.roudane.commerce.order.domain.model.OrderId;
@@ -16,6 +17,7 @@ public class GetOrderUseCaseImpl implements GetOrderUseCase {
     }
 
     @Override
+    @LogBusinessAction(value = "Récupération de la commande")
     public Optional<Order> handle(OrderId id) {
         return orderRepositoryPort.findById(id);
     }

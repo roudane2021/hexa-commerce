@@ -1,6 +1,7 @@
 package com.roudane.commerce.order.infrastructure.rest.user;
 
 
+import com.roudane.commerce.common.domain.annotation.LogTechnicalCall;
 import com.roudane.commerce.order.application.port.in.user.CreateUserUseCase;
 import com.roudane.commerce.order.application.port.in.user.GetUserAllUseCase;
 import com.roudane.commerce.order.infrastructure.rest.user.dto.CreateUserRequest;
@@ -25,6 +26,7 @@ public class UserController {
     }
 
     @PostMapping
+    @LogTechnicalCall("Création d'un utilisateur via l'API REST")
     public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
         var user = createUserUseCase.handle(request.name(), request.email());
         return ResponseEntity.ok(UserResponse.from(user));
@@ -32,6 +34,7 @@ public class UserController {
 
 
     @GetMapping
+    @LogTechnicalCall("Récupération de tous les utilisateurs")
     public ResponseEntity<Set<UserResponse>> getAllUser() {
         var users = getUserAllUseCase.handle().stream().map(UserResponse::from).collect(Collectors.toSet());
         return ResponseEntity.ok(users);
