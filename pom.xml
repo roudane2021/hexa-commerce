@@ -130,6 +130,13 @@
                 <version>${archunit.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- Spring Boot Starter AOP (non présent dans spring-boot-dependencies 4.x BOM) -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-aop</artifactId>
+                <version>3.4.13</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
