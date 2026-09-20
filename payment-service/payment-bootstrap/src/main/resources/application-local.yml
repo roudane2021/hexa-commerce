@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orderdb
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    com.roudane.commerce.order: DEBUG
+    org.hibernate.SQL: DEBUG

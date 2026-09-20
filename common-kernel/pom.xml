@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.roudane.commerce</groupId>
+        <artifactId>commerce-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>common-kernel</artifactId>
+    <packaging>pom</packaging>
+
+    <name>Common Kernel</name>
+    <description>Modules transverses techniques partagés entre tous les microservices</description>
+
+    <modules>
+        <module>common-domain</module>
+        <module>common-exceptions</module>
+        <module>common-web</module>
+        <module>common-messaging</module>
+        <module>common-persistence</module>
+    </modules>
+</project>

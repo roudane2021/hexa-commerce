@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: payment-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/paymentdb
+    username: ${DB_USERNAME:payment_user}
+    password: ${DB_PASSWORD:payment_pass}
+  kafka:
+    consumer:
+      group-id: payment-service
+
+server:
+  port: 8082
