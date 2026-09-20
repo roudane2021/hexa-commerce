@@ -1,7 +1,7 @@
 package com.roudane.commerce.order.infrastructure.rest.order;
 
+import com.roudane.commerce.common.annotation.LogTechnicalCall;
 import com.roudane.commerce.order.application.command.CreateOrderCommand;
-
 import com.roudane.commerce.order.application.port.in.order.CreateOrderUseCase;
 import com.roudane.commerce.order.application.port.in.order.GetOrdersByUserUseCase;
 import com.roudane.commerce.order.domain.model.UserId;
@@ -9,7 +9,12 @@ import com.roudane.commerce.order.infrastructure.rest.order.dto.CreateOrderReque
 import com.roudane.commerce.order.infrastructure.rest.order.dto.OrderResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +32,7 @@ public class OrderController {
     }
 
     @PostMapping
+    @LogTechnicalCall("Controller : Creation Order")
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request) {
         var lines = request.lines().stream()
                 .map(l -> new CreateOrderCommand.OrderLineCommand(l.productId(), l.quantity(), l.unitPrice()))
@@ -39,6 +45,7 @@ public class OrderController {
     }
 
     @GetMapping("/user/{userId}")
+    @LogTechnicalCall("Controller : Recuper  Order by userID")
     public ResponseEntity<List<OrderResponse>> getByUser(@PathVariable("userId") UUID userId) {
         var orders = getOrdersByUserUseCase.handle(new UserId(userId));
         return ResponseEntity.ok(orders.stream().map(OrderResponse::from).toList());

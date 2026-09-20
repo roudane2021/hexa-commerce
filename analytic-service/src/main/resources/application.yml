@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: analytics-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092,localhost:29094,localhost:29095}
+
+analytics:
+  streams:
+    replication-factor: ${KAFKA_REPLICATION_FACTOR:3}
+    state-dir: ${KAFKA_STATE_DIR:/var/lib/kafka-streams/analytics-service}
+
+server:
+  port: 8083

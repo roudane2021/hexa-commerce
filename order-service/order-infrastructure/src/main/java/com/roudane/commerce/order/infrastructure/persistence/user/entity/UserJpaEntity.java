@@ -1,16 +1,16 @@
 package com.roudane.commerce.order.infrastructure.persistence.user.entity;
 
 
+import com.roudane.commerce.common.persistence.BaseJpaEntity;
 import jakarta.persistence.*;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-public class UserJpaEntity {
+public class UserJpaEntity  extends BaseJpaEntity {
 
-    @Id
-    private UUID id;
+
 
     @Column(nullable = false)
     private String name;
@@ -23,12 +23,11 @@ public class UserJpaEntity {
     }
 
     public UserJpaEntity(UUID id, String name, String email) {
-        this.id = id;
+        super(id);
         this.name = name;
         this.email = email;
     }
 
-    public UUID getId() { return id; }
     public String getName() { return name; }
     public String getEmail() { return email; }
 }

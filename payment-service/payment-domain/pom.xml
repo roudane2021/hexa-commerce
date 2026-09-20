@@ -15,12 +15,16 @@
     <packaging>jar</packaging>
 
     <name>Payment Domain</name>
-    <description>Modèle métier pur : Payment, ports (aucune dépendance Spring)</description>
+    <description>Modèle métier pur : Payment, ports out (aucune dépendance Spring)</description>
 
     <dependencies>
         <dependency>
             <groupId>com.roudane.commerce</groupId>
             <artifactId>common-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.roudane.commerce</groupId>
+            <artifactId>common-exceptions</artifactId>
         </dependency>
 
         <dependency>

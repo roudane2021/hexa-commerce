@@ -15,16 +15,17 @@
     <packaging>jar</packaging>
 
     <name>Payment Application</name>
-    <description>Cas d'usage / orchestration : dépend uniquement de payment-domain</description>
+    <description>Cas d'usage : dépend uniquement de payment-domain</description>
 
     <dependencies>
         <dependency>
             <groupId>com.roudane.commerce</groupId>
             <artifactId>payment-domain</artifactId>
         </dependency>
+        <!-- payment-application/pom.xml -->
         <dependency>
             <groupId>com.roudane.commerce</groupId>
-            <artifactId>common-exceptions</artifactId>
+            <artifactId>common-messaging</artifactId>
         </dependency>
 
         <dependency>

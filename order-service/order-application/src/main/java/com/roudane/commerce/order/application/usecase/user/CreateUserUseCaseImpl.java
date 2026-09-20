@@ -1,7 +1,7 @@
 package com.roudane.commerce.order.application.usecase.user;
 
 
-
+import com.roudane.commerce.common.annotation.LogBusinessAction;
 import com.roudane.commerce.order.application.port.in.user.CreateUserUseCase;
 import com.roudane.commerce.order.domain.model.User;
 import com.roudane.commerce.order.domain.port.out.UserRepositoryPort;
@@ -15,6 +15,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
     }
 
     @Override
+    @LogBusinessAction("Création nouveau utilisateur")
     public User handle(String name, String email) {
         User user = User.register(name, email);
         return userRepositoryPort.save(user);

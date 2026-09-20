@@ -23,5 +23,9 @@
         <module>common-web</module>
         <module>common-messaging</module>
         <module>common-persistence</module>
+        <module>common-aop</module>
+        <module>common-annotations</module>
+        <module>common-outbox</module>
+        <module>common-kafka</module>
     </modules>
 </project>

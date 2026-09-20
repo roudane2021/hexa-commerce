@@ -1,6 +1,7 @@
 package com.roudane.commerce.order.infrastructure.persistence.order.entity;
 
 
+import com.roudane.commerce.common.persistence.BaseJpaEntity;
 import com.roudane.commerce.order.domain.model.OrderStatus;
 import jakarta.persistence.*;
 
@@ -11,16 +12,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
-public class OrderJpaEntity {
-
-    @Id
-    private UUID id;
+public class OrderJpaEntity extends BaseJpaEntity {
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
-
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -33,10 +28,9 @@ public class OrderJpaEntity {
         // requis par JPA
     }
 
-    public OrderJpaEntity(UUID id, UUID userId, Instant createdAt, OrderStatus status) {
-        this.id = id;
+    public OrderJpaEntity(UUID id, UUID userId, OrderStatus status) {
+        super(id);
         this.userId = userId;
-        this.createdAt = createdAt;
         this.status = status;
     }
 
@@ -45,9 +39,7 @@ public class OrderJpaEntity {
         this.lines.add(line);
     }
 
-    public UUID getId() { return id; }
     public UUID getUserId() { return userId; }
-    public Instant getCreatedAt() { return createdAt; }
     public OrderStatus getStatus() { return status; }
     public List<OrderLineJpaEntity> getLines() { return lines; }
 }

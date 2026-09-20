@@ -10,7 +10,7 @@ import java.util.List;
 public class Order {
 
     private final OrderId id;
-    private final UserId userId;          // référence par ID, pas l'objet User complet
+    private final UserId userId;
     private final List<OrderLine> lines;
     private final Instant createdAt;
     private OrderStatus status;
@@ -24,21 +24,34 @@ public class Order {
     }
 
     public static Order create(UserId userId, List<OrderLine> lines) {
-        // RG n°1 : une commande doit contenir au moins une ligne
         if (lines == null || lines.isEmpty()) {
             throw new EmptyOrderException();
         }
         return new Order(OrderId.generate(), userId, lines, Instant.now(), OrderStatus.CREATED);
     }
 
-    // RG n°2 : le total est calculé, jamais stocké en dur (évite les incohérences)
     public BigDecimal totalAmount() {
         return lines.stream()
                 .map(OrderLine::subtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // RG n°3 : on ne peut annuler une commande déjà expédiée
+    // ---- Transitions liées au paiement SYNCHRONE (autorisation rapide) ----
+
+    public void markPaymentPending() {
+        this.status = OrderStatus.PAYMENT_PENDING;
+    }
+
+    public void markPaymentRejected() {
+        this.status = OrderStatus.PAYMENT_REJECTED;
+    }
+
+    // ---- Transitions liées au règlement ASYNCHRONE (via Kafka) ----
+
+    public void confirm() {
+        this.status = OrderStatus.CONFIRMED;
+    }
+
     public void cancel() {
         if (this.status == OrderStatus.SHIPPED) {
             throw new OrderAlreadyShippedException(this.id);

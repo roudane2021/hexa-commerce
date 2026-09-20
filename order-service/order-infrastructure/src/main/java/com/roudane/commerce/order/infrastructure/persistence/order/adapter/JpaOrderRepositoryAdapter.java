@@ -1,6 +1,7 @@
 package com.roudane.commerce.order.infrastructure.persistence.order.adapter;
 
 
+import com.roudane.commerce.common.annotation.LogTechnicalCall;
 import com.roudane.commerce.order.domain.model.Order;
 import com.roudane.commerce.order.domain.model.OrderId;
 import com.roudane.commerce.order.domain.model.UserId;
@@ -23,17 +24,20 @@ public class JpaOrderRepositoryAdapter implements OrderRepositoryPort {
     }
 
     @Override
+    @LogTechnicalCall("save Order")
     public Order save(final Order order) {
         OrderJpaEntity saved = jpaRepository.save(OrderMapper.toEntity(order));
         return OrderMapper.toDomain(saved);
     }
 
     @Override
+    @LogTechnicalCall("Find Order by orderID")
     public Optional<Order> findById(final OrderId id) {
-        return jpaRepository.findById(id.value()).map(OrderMapper::toDomain);
+        return jpaRepository.findByIdWithLines(id.value()).map(OrderMapper::toDomain);
     }
 
     @Override
+    @LogTechnicalCall("Find Order by userID")
     public List<Order> findByUserId(final UserId userId) {
         return jpaRepository.findByUserId(userId.value()).stream()
                 .map(OrderMapper::toDomain)

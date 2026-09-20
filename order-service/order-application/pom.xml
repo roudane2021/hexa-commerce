@@ -26,6 +26,11 @@
             <groupId>com.roudane.commerce</groupId>
             <artifactId>common-exceptions</artifactId>
         </dependency>
+        <!-- payment-application/pom.xml -->
+        <dependency>
+            <groupId>com.roudane.commerce</groupId>
+            <artifactId>common-messaging</artifactId>
+        </dependency>
 
         <!-- Tests unitaires avec mocks des ports -->
         <dependency>
