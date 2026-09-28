@@ -35,6 +35,7 @@
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <loki-logback-appender.version>1.5.2</loki-logback-appender.version>
     </properties>
 
     <dependencyManagement>
@@ -88,6 +89,12 @@
                 <version>${mapstruct.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.github.loki4j</groupId>
+                <artifactId>loki-logback-appender</artifactId>
+                <version>${loki-logback-appender.version}</version>
+            </dependency>
+
             <!-- Modules internes : common-kernel -->
             <dependency>
                 <groupId>com.roudane.commerce</groupId>
@@ -134,7 +141,6 @@
                 <artifactId>common-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
 
 
             <!-- Modules internes : order-service -->

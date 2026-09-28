@@ -1,7 +1,6 @@
 package com.roudane.commerce.order.config.beans;
 
 
-import com.roudane.commerce.common.web.client.TraceIdPropagationInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +14,7 @@ public class PaymentClientConfiguration {
     public RestClient paymentServiceRestClient(@Value("${payment-service.base-url}") String baseUrl) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
-                .requestInterceptor(new TraceIdPropagationInterceptor())
+                // .requestInterceptor(new TraceIdPropagationInterceptor())
                 .build();
     }
 }
