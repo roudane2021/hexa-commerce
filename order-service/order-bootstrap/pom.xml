@@ -41,6 +41,12 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- Lombok (utilisé dans les classes @Aspect) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
         <!-- Observabilité (traces distribuées) -->
         <dependency>
             <groupId>io.micrometer</groupId>

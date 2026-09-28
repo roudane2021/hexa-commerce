@@ -136,6 +136,7 @@
             </dependency>
 
 
+
             <!-- Modules internes : order-service -->
             <dependency>
                 <groupId>com.roudane.commerce</groupId>
