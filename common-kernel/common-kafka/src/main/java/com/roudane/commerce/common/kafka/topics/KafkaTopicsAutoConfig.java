@@ -1,9 +1,11 @@
 package com.roudane.commerce.common.kafka.topics;
 
 import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
+import org.springframework.kafka.core.KafkaAdmin.NewTopics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +14,12 @@ import java.util.List;
 public class KafkaTopicsAutoConfig {
 
 
+    @ConditionalOnProperty(
+            name = "app.kafka.auto-create-topics",
+            havingValue = "true"
+    )
     @Bean
-    public List<NewTopic> applicationTopics(KafkaTopicsProperties properties) {
+    public NewTopics applicationTopics(KafkaTopicsProperties properties) {
         List<NewTopic> topics = new ArrayList<>();
 
         for (KafkaTopicsProperties.TopicDefinition def : properties.getTopics()) {
@@ -30,6 +36,7 @@ public class KafkaTopicsAutoConfig {
             }
         }
 
-        return topics;
+        return new NewTopics(
+                topics.toArray(NewTopic[]::new));
     }
 }

@@ -86,6 +86,59 @@ services:
       - kafka-2
       - kafka-3
 
+#  order-service:
+#    build:
+#      context: .
+#      dockerfile: deploy/docker/order-service/Dockerfile
+#    container_name: order-service
+#    ports:
+#      - "8081:8081"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: local
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+#    depends_on:
+#      - kafka-1
+#
+#  payment-service:
+#    build:
+#      context: .
+#      dockerfile: deploy/docker/payment-service/Dockerfile
+#    container_name: payment-service
+#    ports:
+#      - "8082:8082"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: local
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+#    depends_on:
+#      - kafka-1
+#
+#
+#  analytic-service:
+#    build:
+#      context: .
+#      dockerfile: deploy/docker/analytic-service/Dockerfile
+#    container_name: analytic-service
+#    ports:
+#      - "8083:8083"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: local
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+#    depends_on:
+#      - kafka-1
+#
+#  batch-service:
+#    build:
+#      context: .
+#      dockerfile: deploy/docker/batch-service/Dockerfile
+#    container_name: batch-service
+#    ports:
+#      - "8084:8084"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: local
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092
+#    depends_on:
+#      - kafka-1
+
 volumes:
   kafka-1-data:
   kafka-2-data:

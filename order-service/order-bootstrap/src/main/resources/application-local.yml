@@ -21,7 +21,7 @@ spring:
       path: /h2-console
 
   kafka:
-    bootstrap-servers: localhost:29092,localhost:29094,localhost:29095
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092,localhost:29094,localhost:29095}
     consumer:
       group-id: order-group
 
@@ -48,6 +48,7 @@ outbox:
 app:
   kafka:
     auto-create-dlt: true
+    auto-create-topics: true
     topics:
       - name: order.created       # payment-service en a besoin pour son consumer
         partitions: 3
@@ -58,3 +59,4 @@ app:
       - name: payment.failed
         partitions: 3
         replicas: 1
+
