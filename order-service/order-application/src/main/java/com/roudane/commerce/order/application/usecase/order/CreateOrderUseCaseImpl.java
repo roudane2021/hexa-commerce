@@ -9,7 +9,11 @@ import com.roudane.commerce.order.domain.exception.UserNotFoundException;
 import com.roudane.commerce.order.domain.model.Order;
 import com.roudane.commerce.order.domain.model.OrderLine;
 import com.roudane.commerce.order.domain.model.UserId;
-import com.roudane.commerce.order.domain.port.out.*;
+import com.roudane.commerce.order.domain.port.out.OrderPersistencePort;
+import com.roudane.commerce.order.domain.port.out.OrderRepositoryPort;
+import com.roudane.commerce.order.domain.port.out.PaymentClientPort;
+import com.roudane.commerce.order.domain.port.out.UserRepositoryPort;
+
 
 import java.time.Instant;
 import java.util.List;
@@ -23,11 +27,11 @@ public class CreateOrderUseCaseImpl implements CreateOrderUseCase {
     private final EventSerializerPort eventSerializerPort;
 
 
-public CreateOrderUseCaseImpl(OrderRepositoryPort orderRepositoryPort,
+    public CreateOrderUseCaseImpl(OrderRepositoryPort orderRepositoryPort,
                                   UserRepositoryPort userRepositoryPort,
                                   PaymentClientPort paymentClientPort,
                                   EventSerializerPort eventSerializerPort,
-                                OrderPersistencePort orderPersistencePort) {
+                                  OrderPersistencePort orderPersistencePort) {
         this.orderRepositoryPort = orderRepositoryPort;
         this.userRepositoryPort = userRepositoryPort;
         this.paymentClientPort = paymentClientPort;

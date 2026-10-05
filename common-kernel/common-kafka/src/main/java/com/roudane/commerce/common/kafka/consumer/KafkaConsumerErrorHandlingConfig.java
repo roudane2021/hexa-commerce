@@ -1,6 +1,8 @@
 package com.roudane.commerce.common.kafka.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -35,12 +37,15 @@ public class KafkaConsumerErrorHandlingConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
+    @Value("${spring.kafka.schema-registry.url}")
+    private String schemaRegistryUrl;
+
     // ---------- Consumer Factory avec ErrorHandlingDeserializer ----------
     // Protège contre les messages malformés (JSON corrompu) qui, sans ça,
     // planteraient le consumer AVANT même d'atteindre ton code métier.
 
     @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
+    public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -49,8 +54,16 @@ public class KafkaConsumerErrorHandlingConfig {
         // proprement, au lieu de faire planter tout le conteneur
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+
         props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
-        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, StringDeserializer.class);
+        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, KafkaAvroDeserializer.class);
+
+        // 3. Configuration spécifique au Schema Registry
+        props.put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+
+        // Indispensable : force la désérialisation vers tes classes Avro générées (SpecificRecord),
+        // sinon tu obtiens des GenericRecord génériques, moins pratiques à manipuler
+        props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
 
         // Commit manuel : on ne veut PAS que Kafka avance l'offset avant confirmation explicite
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
@@ -67,7 +80,7 @@ public class KafkaConsumerErrorHandlingConfig {
     // ---------- Error Handler : retry avec backoff exponentiel + DLT ----------
 
     @Bean
-    public DefaultErrorHandler kafkaErrorHandler(KafkaOperations<String, String> kafkaOperations) {
+    public DefaultErrorHandler kafkaErrorHandler(KafkaOperations<String, Object> kafkaOperations) {
         // Backoff exponentiel : 1s, 2s, 4s, 8s, 16s (au lieu d'un délai fixe)
         // Évite de marteler un système en panne avec la même cadence
         ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2.0);
@@ -103,11 +116,11 @@ public class KafkaConsumerErrorHandlingConfig {
     // ---------- Listener Container Factory ----------
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
-            ConsumerFactory<String, String> consumerFactory,
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
+            ConsumerFactory<String, Object> consumerFactory,
             DefaultErrorHandler kafkaErrorHandler) {
 
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(kafkaErrorHandler);
 

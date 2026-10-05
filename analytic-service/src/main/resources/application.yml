@@ -2,7 +2,8 @@ spring:
   application:
     name: analytics-service
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092,localhost:29094,localhost:29095}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092,localhost:29094,localhost:29095}
+
 
 analytics:
   streams:

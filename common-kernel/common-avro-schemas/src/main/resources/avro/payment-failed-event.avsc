@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "PaymentFailedEvent",
+  "namespace": "com.roudane.commerce.common.avro",
+  "fields": [
+    { "name": "orderId", "type": "string" },
+    { "name": "paymentId", "type": "string" },
+    { "name": "amount", "type": "double" },
+    { "name": "occurredAt", "type": "string" },
+    { "name": "reason", "type": "string" }
+  ]
+}
