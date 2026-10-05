@@ -1,11 +1,10 @@
 package com.roudane.commerce.order.infrastructure.messaging.consumer;
 
 
-
 import com.roudane.commerce.common.annotation.LogTechnicalCall;
+import com.roudane.commerce.common.avro.PaymentFailedEvent;
+import com.roudane.commerce.common.avro.PaymentValidatedEvent;
 import com.roudane.commerce.common.messaging.event.EventTopic;
-import com.roudane.commerce.common.messaging.event.PaymentFailedEvent;
-import com.roudane.commerce.common.messaging.event.PaymentValidatedEvent;
 import com.roudane.commerce.common.messaging.serialization.EventSerializerPort;
 import com.roudane.commerce.order.application.port.in.order.CancelOrderUseCase;
 import com.roudane.commerce.order.application.port.in.order.ConfirmOrderUseCase;
@@ -15,6 +14,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 public class PaymentResultConsumer {
@@ -38,30 +39,28 @@ public class PaymentResultConsumer {
             topics = EventTopic.PAYMENT_VALIDATED_TOPIC,
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void onPaymentValidated(String rawPayload,
+    public void onPaymentValidated(PaymentValidatedEvent event,
                                    @Header(KafkaHeaders.RECEIVED_KEY) String key,
                                    @Header(value = KafkaHeaders.RECEIVED_PARTITION, required = false) Integer partition,
                                    @Header(value = KafkaHeaders.OFFSET, required = false) Long offset) {
 
-        PaymentValidatedEvent event = eventSerializerPort.deserialize(rawPayload, PaymentValidatedEvent.class);
         log.info("Événement payment.validated reçu [key={}, partition={}, offset={}, orderId={}]",
-                key, partition, offset, event.orderId());
+                key, partition, offset, event.getOrderId());
 
-        confirmOrderUseCase.handle(event.orderId());
+        confirmOrderUseCase.handle(UUID.fromString(event.getOrderId()));
     }
 
     @LogTechnicalCall("Consommation payment.failed")
     @KafkaListener(topics = EventTopic.PAYMENT_FAILED_TOPIC, groupId = "${spring.kafka.consumer.group-id}")
-    public void onPaymentFailed(String rawPayload,
+    public void onPaymentFailed(PaymentFailedEvent event,
                                 @Header(KafkaHeaders.RECEIVED_KEY) String key,
                                 @Header(value = KafkaHeaders.RECEIVED_PARTITION, required = false) Integer partition,
                                 @Header(value = KafkaHeaders.OFFSET, required = false) Long offset) {
 
-        PaymentFailedEvent event = eventSerializerPort.deserialize(rawPayload, PaymentFailedEvent.class);
 
         log.info("Événement payment.Failed reçu [key={}, partition={}, offset={}, orderId={}]",
-                key, partition, offset, event.orderId());
-            cancelOrderUseCase.handle(event.orderId());
+                key, partition, offset, event.getOrderId());
+        cancelOrderUseCase.handle(UUID.fromString(event.getOrderId()));
 
     }
 }

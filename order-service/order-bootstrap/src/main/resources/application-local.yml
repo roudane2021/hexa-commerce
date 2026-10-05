@@ -24,6 +24,8 @@ spring:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092,localhost:29094,localhost:29095}
     consumer:
       group-id: order-group
+    schema-registry:
+      url: http://localhost:8085
 
   flyway:
     enabled: false               # désactivé en local : Hibernate génère le schéma directement avec ddl-auto

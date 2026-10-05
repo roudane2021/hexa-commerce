@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "OrderCreatedEvent",
+  "namespace": "com.roudane.commerce.common.avro",
+  "fields": [
+    { "name": "orderId", "type": "string" },
+    { "name": "userId", "type": "string" },
+    { "name": "totalAmount", "type": "double" },
+    { "name": "occurredAt", "type": "string" }
+  ]
+}
