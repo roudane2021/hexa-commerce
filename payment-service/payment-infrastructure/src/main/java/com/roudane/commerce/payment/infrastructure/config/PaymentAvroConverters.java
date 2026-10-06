@@ -1,4 +1,4 @@
-package com.roudane.commerce.payment.infrastructure.messaging.outbox;
+package com.roudane.commerce.payment.infrastructure.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roudane.commerce.common.avro.PaymentFailedEvent;
