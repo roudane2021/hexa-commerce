@@ -14,6 +14,15 @@ public record OrderLineRequest(
         int quantity,
 
         @NotNull(message = "unitPrice est obligatoire")
-        BigDecimal unitPrice
+        BigDecimal unitPrice,
+        @NotNull(message = "discountType est obligatoire")
+        DiscountType discountType,
+        BigDecimal discountValue,
+        Integer threshold
 ) {
+    public enum DiscountType {
+        NONE,
+        PERCENTAGE,
+        BULK_QUANTITY
+    }
 }

@@ -9,11 +9,14 @@ import com.roudane.commerce.order.domain.exception.UserNotFoundException;
 import com.roudane.commerce.order.domain.model.Order;
 import com.roudane.commerce.order.domain.model.OrderLine;
 import com.roudane.commerce.order.domain.model.UserId;
+import com.roudane.commerce.order.domain.model.discount.BulkQuantityDiscount;
+import com.roudane.commerce.order.domain.model.discount.DiscountStrategy;
+import com.roudane.commerce.order.domain.model.discount.NoDiscount;
+import com.roudane.commerce.order.domain.model.discount.PercentageDiscount;
 import com.roudane.commerce.order.domain.port.out.OrderPersistencePort;
 import com.roudane.commerce.order.domain.port.out.OrderRepositoryPort;
 import com.roudane.commerce.order.domain.port.out.PaymentClientPort;
 import com.roudane.commerce.order.domain.port.out.UserRepositoryPort;
-
 
 import java.time.Instant;
 import java.util.List;
@@ -46,7 +49,7 @@ public class CreateOrderUseCaseImpl implements CreateOrderUseCase {
         userRepositoryPort.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         List<OrderLine> lines = command.lines().stream()
-                .map(l -> new OrderLine(l.productId(), l.quantity(), l.unitPrice()))
+                .map(this::toOrderLine)
                 .toList();
 
         Order order = Order.create(userId, lines);
@@ -73,5 +76,17 @@ public class CreateOrderUseCaseImpl implements CreateOrderUseCase {
         orderRepositoryPort.save(saved);
 
         return saved;
+    }
+
+
+    private OrderLine toOrderLine(CreateOrderCommand.OrderLineCommand lc) {
+        DiscountStrategy strategy = switch (lc.discountType()) {
+            case PERCENTAGE -> new PercentageDiscount(lc.discountValue());
+            case BULK_QUANTITY -> new BulkQuantityDiscount(
+                    lc.discountThreshold(), lc.discountValue());
+            case NONE -> new NoDiscount();
+        };
+        return new OrderLine(lc.productId(), lc.quantity(),
+                lc.unitPrice(), strategy);
     }
 }
