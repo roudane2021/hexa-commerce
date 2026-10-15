@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: commerce-staging
+resources:
+  - ../../base/order-service
+  - ../../base/payment-service
+images:
+  - name: order-service
+    newName: ghcr.io/<owner>/order-service
+    newTag: 0.1.0
+  - name: payment-service
+    newName: ghcr.io/<owner>/payment-service
+    newTag: 0.1.0
+replicas:
+  - { name: order-service, count: 2 }
+  - { name: payment-service, count: 2 }
+labels:
+  - pairs: { environment: staging }
+    includeTemplates: true
+patches:
+  - target: { kind: Deployment }          # s'applique aux deux services
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: { cpu: 250m, memory: 512Mi }
+          limits: { memory: 768Mi }
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [ { name: ghcr-pull } ]
+configMapGenerator:
+  - name: order-service-config
+    behavior: merge
+    literals:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://<staging-db-host>:5432/orderdb
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=<staging-kafka-bootstrap>:9092
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=0.2
+  - name: payment-service-config
+    behavior: merge
+    literals:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://<staging-db-host>:5432/paymentdb
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=<staging-kafka-bootstrap>:9092
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=0.2
+secretGenerator:
+  - name: order-service-secrets
+    envs: [ secrets-order.env ]
+  - name: payment-service-secrets
+    envs: [ secrets-payment.env ]

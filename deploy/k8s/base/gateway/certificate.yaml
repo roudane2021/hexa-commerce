@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: commerce-tls
+spec:
+  secretName: commerce-tls
+  issuerRef: { name: selfsigned, kind: ClusterIssuer }
+  dnsNames: [ api.dev.commerce.local ]

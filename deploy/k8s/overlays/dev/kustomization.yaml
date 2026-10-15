@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: commerce-dev
+resources:
+  - ../../base/order-service
+  - ../../base/payment-service
+  - ../../dev-infra/kafka
+  - ../../base/gateway
+
+patches:
+  - target: { kind: HorizontalPodAutoscaler }
+    patch: |-
+      - op: replace
+        path: /spec/maxReplicas
+        value: 3
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+images:
+  - name: order-service
+    newTag: 0.1.0
+  - name: payment-service
+    newTag: 0.1.0
+labels:
+  - pairs: { environment: dev }
+    includeTemplates: true
+configMapGenerator:
+  - name: order-service-config
+    behavior: merge
+    literals:
+      # - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/orderdb
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update       # DEV UNIQUEMENT
+      - SPRING_FLYWAY_ENABLED=false                # DEV UNIQUEMENT
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+  - name: payment-service-config
+    behavior: merge
+    literals:
+      #  - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/paymentdb
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_FLYWAY_ENABLED=false
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+secretGenerator:
+  - name: order-service-secrets
+    envs: [ secrets-order.env ]
+  - name: payment-service-secrets
+    envs: [ secrets-payment.env ]
