@@ -1,4 +1,11 @@
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  task:
+    scheduling:
+      shutdown:
+        await-termination-period: 15s
+        await-termination: true
   datasource:
     url: jdbc:h2:mem:orderdb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
@@ -46,6 +53,9 @@ outbox:
   polling-interval-ms: 10000
   max-retry: 5
 
+server:
+  port: 8081
+  shutdown: graceful
 
 app:
   kafka:
