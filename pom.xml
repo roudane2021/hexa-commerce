@@ -208,7 +208,7 @@
             <dependency>
                 <groupId>io.confluent</groupId>
                 <artifactId>kafka-avro-serializer</artifactId>
-                <version>7.7.0</version>
+                <version>8.3.2</version>
             </dependency>
 
             <!-- ArchUnit (tests de frontières hexagonales) -->
