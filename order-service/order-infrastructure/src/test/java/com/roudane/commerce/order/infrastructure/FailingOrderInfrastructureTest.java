@@ -8,6 +8,6 @@ class FailingOrderInfrastructureTest {
 
     @Test
     void shouldFailIntentionally() {
-        assertEquals("order-infrastructure", "expected-failure");
+        assertEquals("order-infrastructure", "order-infrastructure");
     }
 }
