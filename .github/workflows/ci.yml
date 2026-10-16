@@ -117,3 +117,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Exporter l'image pour le scan
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}:${{ steps.meta.outputs.version }}
+        run: |
+          docker pull "$IMAGE"
+          docker save "$IMAGE" -o image.tar
+
+      - name: Scan Trivy (HIGH et CRITICAL corrigeables)
+        run: |
+          docker run --rm -v "$PWD":/work \
+            aquasec/trivy:latest \
+            image --input /work/image.tar \
+            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1

@@ -18,7 +18,11 @@ helm install cert-manager oci://quay.io/jetstack/charts/cert-manager \
 # puis créer un ClusterIssuer self-signed pour générer des certificats TLS auto-signés pour le gateway api
 # kubectl apply -f deploy/k8s/platform/cert-manager/clusterissuer-selfsigned.yaml
 
-
+# installer ArgoCD pour gérer les déploiements de l'application
+kubectl create namespace argocd
+kubectl apply -n argocd --server-side --force-conflicts \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.2.3/manifests/install.yaml
+kubectl get pods -n argocd -w
 
 #3 pour tester le gateway api
 
