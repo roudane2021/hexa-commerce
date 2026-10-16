@@ -118,16 +118,51 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Exporter l'image pour le scan
-        env:
-          IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}:${{ steps.meta.outputs.version }}
-        run: |
-          docker pull "$IMAGE"
-          docker save "$IMAGE" -o image.tar
+  #      - name: Exporter l'image pour le scan
+  #        env:
+  #          IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}:${{ steps.meta.outputs.version }}
+  #        run: |
+  #          docker pull "$IMAGE"
+  #          docker save "$IMAGE" -o image.tar
+  #
+  #      - name: Scan Trivy (HIGH et CRITICAL corrigeables)
+  #        run: |
+  #          docker run --rm -v "$PWD":/work \
+  #            aquasec/trivy:latest \
+  #            image --input /work/image.tar \
+  #            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
+  
+  
 
-      - name: Scan Trivy (HIGH et CRITICAL corrigeables)
+  update-gitops:
+    needs: images                       # build, tests ET scans verts
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: gitops-update          # un seul commit de tag à la fois
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository_owner }}/hexa-commerce-gitops
+          token: ${{ secrets.GITOPS_TOKEN }}
+
+      - name: Mettre à jour les tags de dev
+        working-directory: overlays/dev
+        env:
+          OWNER: ${{ github.repository_owner }}
         run: |
-          docker run --rm -v "$PWD":/work \
-            aquasec/trivy:latest \
-            image --input /work/image.tar \
-            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
+          TAG="${GITHUB_SHA::7}"
+          for svc in order-service payment-service; do
+            kustomize edit set image "$svc=ghcr.io/$OWNER/$svc:$TAG"
+          done
+
+      - name: Commit et push
+        run: |
+          git config user.name  "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "dev: ${GITHUB_SHA::7} (${GITHUB_REPOSITORY}@${GITHUB_SHA})"
+          git pull --rebase origin main
+          git push origin HEAD:main

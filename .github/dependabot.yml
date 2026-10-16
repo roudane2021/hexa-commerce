@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+
+
+  - package-ecosystem: docker
+    directory: /deploy/docker/order-service
+    schedule: { interval: weekly }
+
+  - package-ecosystem: docker
+    directory: /deploy/docker/payment-service
+    schedule: { interval: weekly }
+
+  - package-ecosystem: docker
+    directory: /deploy/docker/batch-service
+    schedule: { interval: weekly }
+
+  - package-ecosystem: docker
+    directory: /deploy/docker/analytic-service
+    schedule: { interval: weekly }
