@@ -22,27 +22,66 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '21'        # = maven.compiler.release de ton pom
-          cache: maven              # met en cache ~/.m2, clé = hash de tes pom.xml
+          java-version: '21'
+          cache: maven
 
       - name: Build et tests (tous les modules)
         run: ./mvnw -B -ntp verify
 
-  images:
-    needs: build-test                                    # seulement si les tests passent
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'   # jamais sur une PR
+  # Détecte quels services ont été modifiés par le push
+  detect:
+    needs: build-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}      # liste JSON des filtres modifiés
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.event.before }}               # compare au commit précédent du push
+          filters: |
+            order-service:
+              - 'order-service/**'
+              - 'deploy/docker/order-service/**'
+              - 'pom.xml'
+              - '.mvn/**'
+            payment-service:
+              - 'payment-service/**'
+              - 'deploy/docker/payment-service/**'
+              - 'pom.xml'
+              - '.mvn/**'
+            batch-service:
+              - 'batch-service/**'
+              - 'deploy/docker/batch-service/**'
+              - 'pom.xml'
+              - '.mvn/**'
+            analytic-service:
+              - 'analytic-service/**'
+              - 'deploy/docker/analytic-service/**'
+              - 'pom.xml'
+              - '.mvn/**'
+
+  images:
+    needs: detect
+    if: needs.detect.outputs.services != '[]'            # rien à construire si aucun service touché
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write                                    # droit d'écriture, uniquement ici
     strategy:
       fail-fast: false                                   # un service en échec n'annule pas les autres
       matrix:
+        service: ${{ fromJSON(needs.detect.outputs.services) }}
         include:
           - { service: order-service,    module: order-service/order-bootstrap }
           - { service: payment-service,  module: payment-service/payment-bootstrap }
-          - { service: batch-service,    module: batch-service }       # adapte au vrai module
-          - { service: analytic-service, module: analytic-service }    # adapte au vrai module
+          - { service: batch-service,    module: batch-service }
+          - { service: analytic-service, module: analytic-service }
     steps:
       - uses: actions/checkout@v6
 
@@ -67,7 +106,9 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}
-          tags: type=sha,prefix=,format=short            # tag = identifiant court du commit
+          tags: |
+            type=sha,prefix=,format=short                # tag = identifiant court du commit
+            type=raw,value=latest
 
       - uses: docker/build-push-action@v7
         with:
