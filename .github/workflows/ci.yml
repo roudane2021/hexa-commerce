@@ -35,14 +35,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      services: ${{ steps.filter.outputs.changes }}      # liste JSON des filtres modifiés
+      services: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          base: ${{ github.event.before }}               # compare au commit précédent du push
+          base: ${{ github.event.before }}
           filters: |
             order-service:
               - 'order-service/**'
@@ -67,14 +67,14 @@ jobs:
 
   images:
     needs: detect
-    if: needs.detect.outputs.services != '[]'            # rien à construire si aucun service touché
+    if: needs.detect.outputs.services != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
-      packages: write                                    # droit d'écriture, uniquement ici
+      packages: write
     strategy:
-      fail-fast: false                                   # un service en échec n'annule pas les autres
+      fail-fast: false
       matrix:
         service: ${{ fromJSON(needs.detect.outputs.services) }}
         include:
@@ -100,14 +100,14 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}          # jeton temporaire, rien à stocker
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - id: meta
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}
           tags: |
-            type=sha,prefix=,format=short                # tag = identifiant court du commit
+            type=sha,prefix=,format=short
             type=raw,value=latest
 
       - uses: docker/build-push-action@v7
@@ -116,6 +116,6 @@ jobs:
           file: deploy/docker/${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}       # étiquettes OCI : dépôt, commit, date
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

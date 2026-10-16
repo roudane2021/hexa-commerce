@@ -34,7 +34,7 @@ public class PaymentResultConsumer {
         this.eventSerializerPort = eventSerializerPort;
     }
 
-    @LogTechnicalCall("Consommation payment.validated")
+    @LogTechnicalCall("Consommation  payment.validated")
     @KafkaListener(
             topics = EventTopic.PAYMENT_VALIDATED_TOPIC,
             groupId = "${spring.kafka.consumer.group-id}"
