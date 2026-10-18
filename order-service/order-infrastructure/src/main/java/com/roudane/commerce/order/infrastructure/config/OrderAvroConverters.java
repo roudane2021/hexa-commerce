@@ -15,7 +15,7 @@ public class OrderAvroConverters {
 
     @Bean
     public AvroEventConverterRegistry orderAvroEventConverterRegistry(ObjectMapper objectMapper) {
-        //Mapper 2 AvroEventConverterRegistry pour les événements liés aux commandes
+        //Mapper 18 AvroEventConverterRegistry pour les événements liés aux commandes
         return new AvroEventConverterRegistry(objectMapper)
                 .register(EventTopic.ORDER_CREATED.getName(), node -> OrderCreatedEvent.newBuilder()
                         .setOrderId(text(node, "orderId"))

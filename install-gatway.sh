@@ -22,7 +22,11 @@ helm install cert-manager oci://quay.io/jetstack/charts/cert-manager \
 kubectl create namespace argocd
 kubectl apply -n argocd --server-side --force-conflicts \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.2.3/manifests/install.yaml
-kubectl get pods -n argocd -w
+
+## kubectl port-forward -n argocd svc/argocd-server 9443:443 &
+## kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+# https://localhost:9443   utilisateur : admin
+## kubectl get pods -n argocd -w
 
 #3 pour tester le gateway api
 
