@@ -26,21 +26,21 @@ public class JpaOrderRepositoryAdapter implements OrderRepositoryPort {
     @Override
     @LogTechnicalCall("save Order")
     public Order save(final Order order) {
-        OrderJpaEntity saved = jpaRepository.save(OrderMapper.toEntity(order));
-        return OrderMapper.toDomain(saved);
+        OrderJpaEntity saved = jpaRepository.save(OrderMapper.INSTANCE.toEntity(order));
+        return OrderMapper.INSTANCE.toDomain(saved);
     }
 
     @Override
     @LogTechnicalCall("Find Order by orderID")
     public Optional<Order> findById(final OrderId id) {
-        return jpaRepository.findByIdWithLines(id.value()).map(OrderMapper::toDomain);
+        return jpaRepository.findByIdWithLines(id.value()).map(OrderMapper.INSTANCE::toDomain);
     }
 
     @Override
     @LogTechnicalCall("Find Order by userID")
     public List<Order> findByUserId(final UserId userId) {
         return jpaRepository.findByUserId(userId.value()).stream()
-                .map(OrderMapper::toDomain)
+                .map(OrderMapper.INSTANCE::toDomain)
                 .toList();
     }
 }

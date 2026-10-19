@@ -31,7 +31,7 @@ public class TransactionalOrderPersistenceAdapter implements OrderPersistencePor
     @Transactional
     @LogTechnicalCall("Sauvegarde commande + événement outbox")
     public Order createAndEnqueueEvent(Order order, String eventPayloadJson) {
-        final OrderJpaEntity orderJpaEntity = OrderMapper.toEntity(order);
+        final OrderJpaEntity orderJpaEntity = OrderMapper.INSTANCE.toEntity(order);
         OrderJpaEntity savedEntity = orderJpaRepository.save(orderJpaEntity);
 
         OutboxEventJpaEntity outboxEvent = new OutboxEventJpaEntity(
@@ -42,6 +42,6 @@ public class TransactionalOrderPersistenceAdapter implements OrderPersistencePor
         );
         outboxEventJpaRepository.save(outboxEvent);
 
-        return OrderMapper.toDomain(savedEntity);
+        return OrderMapper.INSTANCE.toDomain(savedEntity);
     }
 }

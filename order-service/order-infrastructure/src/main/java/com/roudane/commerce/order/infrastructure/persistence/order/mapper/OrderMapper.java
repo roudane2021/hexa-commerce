@@ -9,80 +9,85 @@ import com.roudane.commerce.order.domain.model.discount.DiscountStrategy;
 import com.roudane.commerce.order.domain.model.discount.PercentageDiscount;
 import com.roudane.commerce.order.infrastructure.persistence.order.entity.OrderJpaEntity;
 import com.roudane.commerce.order.infrastructure.persistence.order.entity.OrderLineJpaEntity;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.UUID;
 
-public class OrderMapper {
+@Mapper(componentModel = "spring")
+public abstract class OrderMapper {
 
-    private OrderMapper() {
-    }
+    public static final OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-    public static OrderJpaEntity toEntity(Order order) {
+    // ---------- Domaine -> Entité ----------
 
-        final OrderJpaEntity entity = OrderJpaEntity.builder()
-                .userId(order.getUserId().value())
-                .status(order.getStatus())
-                .build();
+    @Mapping(target = "id", source = "id.value")
+    @Mapping(target = "userId", source = "userId.value")
+    @Mapping(target = "lines", ignore = true)
+    public abstract OrderJpaEntity toEntity(Order order);
 
+    @Mapping(target = "discountType", source = "discountStrategy", qualifiedByName = "discountType")
+    @Mapping(target = "discountValue", source = "discountStrategy", qualifiedByName = "discountValue")
+    @Mapping(target = "discountThreshold", source = "discountStrategy", qualifiedByName = "discountThreshold")
+    protected abstract OrderLineJpaEntity toLineEntity(OrderLine line);
+
+    // Remplace entity::addLine : attache chaque ligne à son parent (order_id)
+    @AfterMapping
+    protected void attachLines(Order order, @MappingTarget OrderJpaEntity entity) {
         order.getLines().stream()
-                .map(OrderMapper::toLineEntity)
+                .map(this::toLineEntity)
                 .forEach(entity::addLine);
-
-        return entity;
     }
 
-    public static Order toDomain(OrderJpaEntity entity) {
-        List<OrderLine> lines = entity.getLines().stream()
-                .map(l -> new OrderLine(l.getProductId(), l.getQuantity(), l.getUnitPrice()))
-                .toList();
+    // ---------- Entité -> Domaine ----------
 
-        return new Order(
-                new OrderId(entity.getId()),
-                new UserId(entity.getUserId()),
-                lines,
-                entity.getCreatedAt(),
-                entity.getStatus()
-        );
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "userId", source = "userId")
+    public abstract Order toDomain(OrderJpaEntity entity);
+
+    protected OrderLine toDomainLine(OrderLineJpaEntity l) {
+        return new OrderLine(l.getProductId(), l.getQuantity(), l.getUnitPrice() /*, toStrategy(l) */);
     }
 
-    private static OrderLineJpaEntity toLineEntity(OrderLine line) {
-        DiscountStrategy strategy = line.getDiscountStrategy();
-
-        return OrderLineJpaEntity.builder()
-                .productId(line.getProductId())
-                .quantity(line.getQuantity())
-                .unitPrice(line.getUnitPrice())
-                .discountType(toDiscountTypeJpa(strategy))
-                .discountValue(extractDiscountValue(strategy))
-                .discountThreshold(extractDiscountThreshold(strategy))
-                .build();
+    protected OrderId toOrderId(UUID id) {
+        return id == null ? null : new OrderId(id);
     }
 
-    private static OrderLineJpaEntity.DiscountTypeJpa toDiscountTypeJpa(DiscountStrategy strategy) {
-        if (strategy == null) {
-            return OrderLineJpaEntity.DiscountTypeJpa.NONE;
-        }
-        return switch (strategy) {
+    protected UserId toUserId(UUID id) {
+        return id == null ? null : new UserId(id);
+    }
+
+    // ---------- Stratégies de remise ----------
+
+    @Named("discountType")
+    protected OrderLineJpaEntity.DiscountTypeJpa toDiscountType(DiscountStrategy s) {
+        return switch (s) {
+            case null -> OrderLineJpaEntity.DiscountTypeJpa.NONE;
             case PercentageDiscount p -> OrderLineJpaEntity.DiscountTypeJpa.PERCENTAGE;
             case BulkQuantityDiscount b -> OrderLineJpaEntity.DiscountTypeJpa.BULK_QUANTITY;
             default -> OrderLineJpaEntity.DiscountTypeJpa.NONE;
-
         };
     }
 
-    private static BigDecimal extractDiscountValue(DiscountStrategy strategy) {
-        return switch (strategy) {
+    @Named("discountValue")
+    protected BigDecimal toDiscountValue(DiscountStrategy s) {
+        return switch (s) {
             case PercentageDiscount p -> p.percentage();
             case BulkQuantityDiscount b -> b.percentageAboveThreshold();
-            default -> null;
+            case null, default -> null;
         };
     }
 
-    private static Integer extractDiscountThreshold(DiscountStrategy strategy) {
-        return switch (strategy) {
+    @Named("discountThreshold")
+    protected Integer toDiscountThreshold(DiscountStrategy s) {
+        return switch (s) {
             case BulkQuantityDiscount b -> b.thresholdQuantity();
-            default -> null;
+            case null, default -> null;
         };
     }
 }
