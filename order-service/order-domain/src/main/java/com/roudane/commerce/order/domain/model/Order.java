@@ -6,6 +6,8 @@ import com.roudane.commerce.order.domain.exception.OrderAlreadyShippedException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Order {
 
@@ -36,6 +38,23 @@ public class Order {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public BigDecimal totalSavings() {
+        return lines.stream()
+                .map(line -> line.getUnitPrice().multiply(BigDecimal.valueOf(line.getQuantity()))
+                        .subtract(line.subtotal()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public Map<String, List<OrderLine>> groupLinesByPriceRange() {
+        return lines.stream()
+                .collect(Collectors.groupingBy(line -> {
+                    if (line.getUnitPrice().compareTo(BigDecimal.valueOf(50)) < 0) return "ÉCONOMIQUE";
+                    if (line.getUnitPrice().compareTo(BigDecimal.valueOf(200)) < 0) return "STANDARD";
+                    return "PREMIUM";
+                }));
+    }
+    
+
     // ---- Transitions liées au paiement SYNCHRONE (autorisation rapide) ----
 
     public void markPaymentPending() {
@@ -59,9 +78,23 @@ public class Order {
         this.status = OrderStatus.CANCELLED;
     }
 
-    public OrderId getId() { return id; }
-    public UserId getUserId() { return userId; }
-    public List<OrderLine> getLines() { return lines; }
-    public Instant getCreatedAt() { return createdAt; }
-    public OrderStatus getStatus() { return status; }
+    public OrderId getId() {
+        return id;
+    }
+
+    public UserId getUserId() {
+        return userId;
+    }
+
+    public List<OrderLine> getLines() {
+        return lines;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
 }

@@ -8,6 +8,10 @@ public record CreateOrderCommand(
         UUID userId,
         List<OrderLineCommand> lines
 ) {
-    public record OrderLineCommand(String productId, int quantity, BigDecimal unitPrice) {
+    public record OrderLineCommand(String productId, int quantity, BigDecimal unitPrice, DiscountType discountType,
+                                   BigDecimal discountValue,
+                                   Integer discountThreshold) {
     }
+
+    public enum DiscountType {NONE, PERCENTAGE, BULK_QUANTITY}
 }

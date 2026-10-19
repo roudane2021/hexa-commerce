@@ -1,12 +1,12 @@
 package com.roudane.commerce.order.infrastructure.rest.order;
 
 import com.roudane.commerce.common.annotation.LogTechnicalCall;
-import com.roudane.commerce.order.application.command.CreateOrderCommand;
 import com.roudane.commerce.order.application.port.in.order.CreateOrderUseCase;
 import com.roudane.commerce.order.application.port.in.order.GetOrdersByUserUseCase;
 import com.roudane.commerce.order.domain.model.UserId;
 import com.roudane.commerce.order.infrastructure.rest.order.dto.CreateOrderRequest;
 import com.roudane.commerce.order.infrastructure.rest.order.dto.OrderResponse;
+import com.roudane.commerce.order.infrastructure.rest.order.mapper.OrderRequestMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,13 +34,12 @@ public class OrderController {
     @PostMapping
     @LogTechnicalCall("Controller : Creation Order")
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request) {
-        var lines = request.lines().stream()
-                .map(l -> new CreateOrderCommand.OrderLineCommand(l.productId(), l.quantity(), l.unitPrice()))
-                .toList();
+        // MapStruct gère la conversion complète du Request vers la Command en 1 ligne
+        var command = OrderRequestMapper.INSTANCE.toCommand(request);
 
-        var command = new CreateOrderCommand(request.userId(), lines);
         var order = createOrderUseCase.handle(command);
 
+        // Bonnes pratiques REST : retourner un statut 201 CREATED pour une création
         return ResponseEntity.ok(OrderResponse.from(order));
     }
 

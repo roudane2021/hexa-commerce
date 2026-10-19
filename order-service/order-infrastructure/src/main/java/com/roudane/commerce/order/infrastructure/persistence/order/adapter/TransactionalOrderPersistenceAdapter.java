@@ -1,7 +1,6 @@
 package com.roudane.commerce.order.infrastructure.persistence.order.adapter;
 
 
-
 import com.roudane.commerce.common.annotation.LogTechnicalCall;
 import com.roudane.commerce.common.messaging.event.EventTopic;
 import com.roudane.commerce.common.outbox.entities.OutboxEventJpaEntity;
@@ -32,7 +31,8 @@ public class TransactionalOrderPersistenceAdapter implements OrderPersistencePor
     @Transactional
     @LogTechnicalCall("Sauvegarde commande + événement outbox")
     public Order createAndEnqueueEvent(Order order, String eventPayloadJson) {
-        OrderJpaEntity savedEntity = orderJpaRepository.save(OrderMapper.toEntity(order));
+        final OrderJpaEntity orderJpaEntity = OrderMapper.INSTANCE.toEntity(order);
+        OrderJpaEntity savedEntity = orderJpaRepository.save(orderJpaEntity);
 
         OutboxEventJpaEntity outboxEvent = new OutboxEventJpaEntity(
                 UUID.randomUUID(),
@@ -42,6 +42,6 @@ public class TransactionalOrderPersistenceAdapter implements OrderPersistencePor
         );
         outboxEventJpaRepository.save(outboxEvent);
 
-        return OrderMapper.toDomain(savedEntity);
+        return OrderMapper.INSTANCE.toDomain(savedEntity);
     }
 }
