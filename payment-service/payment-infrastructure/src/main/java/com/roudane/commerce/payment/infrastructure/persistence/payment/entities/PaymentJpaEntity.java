@@ -19,8 +19,7 @@ public class PaymentJpaEntity extends BaseJpaEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    //@Enumerated(EnumType.STRING) test a b
-    // test stash
+    //@Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private String status;
 
