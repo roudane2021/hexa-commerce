@@ -2,7 +2,9 @@ package com.roudane.commerce.payment.infrastructure.persistence.payment.entities
 
 
 import com.roudane.commerce.common.persistence.BaseJpaEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -17,7 +19,7 @@ public class PaymentJpaEntity extends BaseJpaEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    //@Enumerated(EnumType.STRING)
+    //@Enumerated(EnumType.STRING) sup 1
     @Column(nullable = false)
     private String status;
 
@@ -31,8 +33,19 @@ public class PaymentJpaEntity extends BaseJpaEntity {
         this.status = status;
     }
 
-    public UUID getOrderId() { return orderId; }
-    public BigDecimal getAmount() { return amount; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public UUID getOrderId() {
+        return orderId;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }
