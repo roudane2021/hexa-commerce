@@ -19,7 +19,7 @@ public class PaymentJpaEntity extends BaseJpaEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    //@Enumerated(EnumType.STRING) sup 1 2
+    //@Enumerated(EnumType.STRING) sup 1 2 3
     @Column(nullable = false)
     private String status;
 
