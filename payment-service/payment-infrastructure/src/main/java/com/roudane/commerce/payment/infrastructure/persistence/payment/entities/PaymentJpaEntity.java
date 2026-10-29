@@ -20,6 +20,7 @@ public class PaymentJpaEntity extends BaseJpaEntity {
     private BigDecimal amount;
 
     //@Enumerated(EnumType.STRING) test a b
+    // test stash
     @Column(nullable = false)
     private String status;
 
